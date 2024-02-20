@@ -145,8 +145,47 @@ def process_RESC(xml_file):
     """
     5a. Fiscal Year Estimates 
     """
-    def process_fiscal_year_estimates(xml_root, ticker):
-        pass
+    def process_fiscal_year_estimates_helper(xml_root, ticker, periodType='A'):
+        actuals = tree.findall(f"ConsEstimates/FYEstimates/FYEstimate")
+        actual_mappings = {
+            'values': {
+                'high_curr': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
+                'low_curr': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='Low']/ConsValue[@dateType='CURR']",
+                'mean_curr': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='Mean']/ConsValue[@dateType='CURR']",
+                'mean_1ma': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='Mean']/ConsValue[@dateType='1MA']",
+                'mean_3ma': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='Mean']/ConsValue[@dateType='3MA']",
+                'median_curr': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='Median']/ConsValue[@dateType='CURR']",
+                'stdev_curr': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='StdDev']/ConsValue[@dateType='CURR']",
+                'numberOfEst_curr': f"FYPeriod[@periodType='{periodType}']/ConsEstimate[@type='NumOfEst']/ConsValue[@dateType='CURR']",
+            }, 
+            'attributes': {
+                'fYear': (f"FYPeriod[@periodType='{periodType}']", 'fYear'),
+                'endMonth': (f"FYPeriod[@periodType='{periodType}']", 'endMonth'),
+                'endCalYear': (f"FYPeriod[@periodType='{periodType}']", 'endCalYear')
+            },
+        }
+        
+        # Create all the columns:
+        columns = ['ticker', 'type', 'unit'] + list(actual_mappings['values'].keys()) + list(actual_mappings['attributes'].keys())
+        column_data = {c: [] for c in columns}
+
+        for fyactual in actuals:
+            for key, value in actual_mappings['values'].items():
+                column_data[key] += [ e.text for e in fyactual.findall(value)]
+                
+            for key, (value, attribute) in actual_mappings['attributes'].items():
+                column_data[key] += [ e.attrib[attribute] for e in fyactual.findall(value)]
+
+            column_data['ticker'] += [ticker] * (len(column_data[key]) - len(column_data['ticker']))
+            column_data['type'] += [fyactual.attrib['type']] * (len(column_data[key]) - len(column_data['type']))
+            column_data['unit'] += [fyactual.attrib['unit']]  * (len(column_data[key]) - len(column_data['unit']))
+
+        # Fill dataframe:
+        df = pd.DataFrame(columns=columns)
+        for c in columns:
+            print("Inserting", c)
+            df[c] = column_data[c]
+        return df
 
     """
     5b. Net Profit Estimates
