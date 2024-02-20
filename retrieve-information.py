@@ -9,11 +9,10 @@ ib = IB()
 
 ib.connect('127.0.0.1', 7496, clientId = 3)
 
-def get_fundamentals_for(stock_ticker, market = 'SMART', currency = 'USD'):
+def get_fundamentals_for(stock_ticker, market = 'SMART', currency = 'USD', report = 'ReportsFinStatements'):
     contract = Stock(stock_ticker, market, currency)
-    reportsToRequest = ['ReportsFinStatements', 'ReportSnapshot'] # ['ReportsFinSummary', 'ReportsOwnership', 'ReportSnapshot', 'ReportsFinStatements', 'RESC']
-    reports = { report: ib.reqFundamentalData(contract, report) for report in reportsToRequest }
-    return reports
+
+    return ib.reqFundamentalData(contract, report)
 
 
 
@@ -21,12 +20,13 @@ def get_fundamentals_for(stock_ticker, market = 'SMART', currency = 'USD'):
 # fundamentals = ib.reqFundamentalData(contract, 'ReportsFinStatements')
 
 companies_to_get = ['TITN', 'BLBD', 'BMM', 'GOTU', 'SKY', 'CPRI', 'OC', 'ASTE', 'KGS', 'GPS', 'ONON', 'ATGE', 'SHLS', 'IIAC.U', 'DECK', 'U', 'HDB', 'PLOW', 'MFB', 'SCS', 'MUFG', 'MDC', 'POWL', 'JFB', 'HSBC', 'JL', 'ENR', 'MTW', 'HNI', 'ACDC', 'MTH', 'BLDR', 'INVE', 'ANF', 'EIN3', 'AEO', 'ATNY', 'PERY', 'LOPE', 'MAS', 'IVAC', 'RELL', 'SKX', 'CROX', 'AONE', 'ENVX', 'KBH', 'SIG', 'WFC', 'JPM', 'TMHC', 'BAC', 'OMX', 'RAA', 'KNL', 'VICR', 'CSL', 'MOV', 'ASO', 'IBN', 'OMP', 'URBN', 'HLX', 'MLKN', 'HUL', 'PRDO', 'LAUR', 'WMS', 'RES', 'BIRK']
+reports_to_request = ['ReportsFinStatements', 'ReportSnapshot', 'RESC'] # ['ReportsFinSummary', 'ReportsOwnership', 'ReportSnapshot', 'ReportsFinStatements', 'RESC']
+
+# Niet gevonden: BMM, IIAC.U, MFB, JFB, EIN3, ATNY, PERY, AONE, OMX, RAA, KNL, OMP, HUL
 
 # Create folder "fundamentals" if it doesn't exist
 if not os.path.exists('fundamentals'):
     os.makedirs('fundamentals')
-
-# Niet gevonden: BMM, IIAC.U, MFB, JFB, EIN3, ATNY, PERY, AONE, OMX, RAA, KNL, OMP, HUL
 
 for company in companies_to_get:
 
@@ -35,10 +35,11 @@ for company in companies_to_get:
     if not os.path.exists(f'./fundamentals/{company}'):
         os.makedirs(f'./fundamentals/{company}')
         
-        fund = get_fundamentals_for(company)
+    for report in reports_to_request
+        if not os.path.exists(f'./fundamentals/{company}/{report}.xml'):
+            fund = get_fundamentals_for(stock_ticker=company, report=report)
         
-        for r in fund.keys():
-            with open(f'./fundamentals/{company}/{r}.xml', 'w') as file:
-                file.write(str(fund[r]))
+            with open(f'./fundamentals/{company}/{report}.xml', 'w') as file:
+                file.write(fund)
 
 ib.disconnect()
