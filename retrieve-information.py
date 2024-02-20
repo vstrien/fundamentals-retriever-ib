@@ -35,11 +35,11 @@ for company in companies_to_get:
     if not os.path.exists(f'./fundamentals/{company}'):
         os.makedirs(f'./fundamentals/{company}')
         
-    for report in reports_to_request
+    for report in reports_to_request:
         if not os.path.exists(f'./fundamentals/{company}/{report}.xml'):
             fund = get_fundamentals_for(stock_ticker=company, report=report)
         
             with open(f'./fundamentals/{company}/{report}.xml', 'w') as file:
-                file.write(fund)
+                file.write(str(fund))
 
 ib.disconnect()
