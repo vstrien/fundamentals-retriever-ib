@@ -196,29 +196,10 @@ def process_RESC(xml_file):
     """
     5a. Fiscal Year Estimates 
     """
-    def xml_processor_helper(toplevel_elts: list, mappings: dict, toplevel_attrs: dict = {}, extra_fixed_columns: dict = {}):
-        columns = [ a for a in toplevel_attrs.keys() ] + [ c for c in extra_fixed_columns.keys() ] + list(mappings['values'].keys()) + list(mappings['attributes'].keys())
-        column_data = {c: [] for c in columns}
-
-        for el in toplevel_elts:
-            for key, value in mappings['values'].items():
-                column_data[key] += [ e.text for e in el.findall(value)]
-                
-            for key, (value, attribute) in mappings['attributes'].items():
-                column_data[key] += [ e.attrib[attribute] for e in el.findall(value)]
-
-            for key, value in toplevel_attrs.items():
-                column_data[key] += [ el.attrib[value] ] * (len(column_data[key]) - max([len(a) for a in column_data.values()]))
-            
-            for key, value in extra_fixed_columns.items():
-                column_data[key] += [ value ] * (len(column_data[key]) - max([len(a) for a in column_data.values()]))
-        
-        return column_data
-    
     def process_fiscal_year_estimates_helper(tree, ticker, periodType='A'):
-        fy_parentlevel_attrs = {'type': 'type', 'unit': 'unit'}
+        fy_collectionlevel_attrs = {'type': 'type', 'unit': 'unit'}
         fy_extra_fixed_columns = {'ticker': ticker}
-        fy_mappings = {
+        fy_itemlevel_mappings = {
                     'values': {
                         'high_curr': f"ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
                         'low_curr': f"ConsEstimate[@type='Low']/ConsValue[@dateType='CURR']",
@@ -231,7 +212,7 @@ def process_RESC(xml_file):
                     },
                     'attributes': {}
                 }
-        fy_toplevelattribs = {
+        fy_itemlevel_attribs = {
                         'fYear': 'fYear',
                         'endMonth': 'endMonth',
                         'endCalYear': 'endCalYear'
@@ -239,16 +220,35 @@ def process_RESC(xml_file):
         # Voor de helper stapt deze een niveau te hoog in. De FYEstimate heeft namelijk per FYPeriod verschillende aantallen waarden.
         # Daarom halen we eerst de algemene attributen van FYEstimate op. Daarna gaan we een niveau dieper.
         fyestimates = tree.findall(f"ConsEstimates/FYEstimates/FYEstimate")
-        columns = [ a for a in fy_parentlevel_attrs.keys() ] + [ c for c in fy_extra_fixed_columns.keys() ] + list(fy_mappings['values'].keys()) + list(fy_toplevelattribs.keys())
+        columns = [ a for a in fy_collectionlevel_attrs.keys() ] + [ c for c in fy_extra_fixed_columns.keys() ] + list(fy_itemlevel_mappings['values'].keys()) + list(fy_itemlevel_attribs.keys())
         column_data = {c: [] for c in columns}
 
         for f in fyestimates:
             extra_fixed_columns = {'ticker': ticker, 'type': f.attrib['type'], 'unit': f.attrib['unit']}
             fyperiods = f.findall(f"FYPeriod[@periodType='{periodType}']")
-            estimate_data = xml_processor_helper(fyperiods, fy_mappings, fy_toplevelattribs, extra_fixed_columns)
-            for c in columns:
-                column_data[c] += list(estimate_data[c])
 
+            for el in fyperiods:
+                for key, value in fy_itemlevel_mappings['values'].items():
+                    column_data[key] += [ e.text for e in el.findall(value)]
+                    
+                for key, (value, attribute) in fy_itemlevel_mappings['attributes'].items():
+                    column_data[key] += [ e.attrib[attribute] for e in el.findall(value)]
+
+                for key, value in fy_itemlevel_attribs.items():
+                    column_data[key] += [ el.attrib[value] ] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+                
+                for key, value in extra_fixed_columns.items():
+                    column_data[key] += [ value ] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+                
+                for key in column_data:
+                    column_data[key] += [None] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+            
+        # Fill dataframe:
+        df = pd.DataFrame(columns=columns)
+        for c in columns:
+            df[c] = column_data[c]
+        return df
+    
         
 
     def process_fiscal_year_estimates_annual(tree, ticker):
@@ -264,10 +264,10 @@ def process_RESC(xml_file):
         estimates = tree.findall(f"ConsEstimates/NPEstimates/NPEstimate")
         estimate_mappings = {
             'values': {
-                'high_curr': f"NPEstimate/ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
-                'low_curr': f"NPEstimate/ConsEstimate[@type='Low']/ConsValue[@dateType='CURR']",
-                'mean_curr': f"NPEstimate/ConsEstimate[@type='Mean']/ConsValue[@dateType='CURR']",
-                'median_curr': f"NPEstimate/ConsEstimate[@type='Median']/ConsValue[@dateType='CURR']",
+                'high_curr': f"ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
+                'low_curr': f"ConsEstimate[@type='Low']/ConsValue[@dateType='CURR']",
+                'mean_curr': f"ConsEstimate[@type='Mean']/ConsValue[@dateType='CURR']",
+                'median_curr': f"ConsEstimate[@type='Median']/ConsValue[@dateType='CURR']",
             },
             'attributes': {}
         }
