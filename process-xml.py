@@ -6,16 +6,159 @@ import pandas as pd
 # list all subdirectories in the "fundamentals" directory
 companies = [ name for name in os.listdir('fundamentals') if os.path.isdir(os.path.join('fundamentals', name)) ]
 
-def process_ReportsFinStatements(xml_file):
-    return
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+class process_ReportsFinStatements():
+    def __init__(self, xml_file):
+        self.tree = ET.parse(xml_file)
 
-    for child in root:
-        print(child.tag, child.attrib)
+    def _xml_processor(self, tree, rootelementpath: str, mappings: dict = {'values': {}, 'attributes': {}}, toplevelattributes: dict = {}, fixed_columns: dict = {}):
+        collection = tree.findall(rootelementpath)
 
+        columns = list(mappings['values'].keys()) + list(mappings['attributes'].keys()) + list(toplevelattributes.keys()) + list(fixed_columns.keys())
+        column_data = {c: [] for c in columns}
 
+        rowno = 1
+        for el in collection:
+            for key, value in mappings['values'].items():
+                column_data[key] += [ e.text for e in el.findall(value)]
+                
+            for key, (value, attribute) in mappings['attributes'].items():
+                column_data[key] += [ e.attrib[attribute] for e in el.findall(value)]
 
+            # Fill top level attributes for every row that is added:
+            for key, value in toplevelattributes.items():
+                column_data[key] += [ el.attrib[value] ] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
+            
+            # Fill fixed column values for every row that is added:
+            for key, value in fixed_columns.items():
+                column_data[key] += [ value ] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
+            
+            # Insert empty column values for columns that are not filled in this iteration:
+            for key in column_data:
+                column_data[key] += [None] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
+            rowno += 1
+
+        # Fill dataframe:
+        df = pd.DataFrame(columns=columns)
+        for c in columns:
+            df[c] = column_data[c]
+        return df
+    
+    def process_toplevel_info(self):
+        toplevel_mappings = {
+            'values': {
+                'RepNo': 'CoIDs/CoID[@Type="RepNo"]',
+                'CompanyName': 'CoIDs/CoID[@Type="CompanyName"]',
+                'IRSNo': 'CoIDs/CoID[@Type="IRSNo"]',
+                'CIKNo': 'CoIDs/CoID[@Type="CIKNo"]',
+                'OrganizationPermID': 'CoIDs/CoID[@Type="OrganizationPermID"]',
+                'CashFlowMethod': 'StatementInfo/CashFlowMethod',
+                'BalanceSheetDisplay': 'StatementInfo/BalanceSheetDisplay',
+                'COAType': 'StatementInfo/COAType',
+            },
+            'attributes': {
+                'CashFlowMethodCode': ('StatementInfo/CashFlowMethod', 'Code'),
+                'BlanceSheetDisplayCode': ('StatementInfo/BalanceSheetDisplay', 'Code'),
+                'COATypeCode': ('StatementInfo/COAType', 'Code'),
+            }
+        }
+        return self._xml_processor(self.tree, '.', mappings=toplevel_mappings)
+    
+    def process_issues(self):
+        issue_mappings = {
+            'values': {
+                'Issue Name': 'IssueID[@Type="Name"]',
+                'Issue Ticker': 'IssueID[@Type="Ticker"]',
+                'Issue RIC': 'IssueID[@Type="RIC"]',
+                'Issue DisplayRIC': 'IssueID[@Type="DisplayRIC"]',
+                'Issue InstrumentPI': 'IssueID[@Type="InstrumentPI"]',
+                'Issue QuotePI': 'IssueID[@Type="QuotePI"]',
+                'Issue InstrumentPermID': 'IssueID[@Type="InstrumentPermID"]',
+                'Issue QuotePermID': 'IssueID[@Type="QuotePermID"]',
+                'Issue Exchange': 'Exchange',
+                'Issue MostRecentSplit': 'MostRecentSplit',
+            },
+            'attributes': {
+                'ExchangeCode': ('Exchange', 'Code'),
+                'ExchangeCountry': ('Exchange', 'Country'),
+                'MostRecentSplit Date': ('MostRecentSplit', 'Date'),
+            }
+        }
+        return self._xml_processor(self.tree, 'Issues/Issue', issue_mappings, {'IssueID': 'ID', 'IssueType': 'Type', 'IssueDesc': 'Desc', 'IssueOrder': 'Order'})
+
+    def process_financial_statement_column_mapping(self):
+        fs_mappings = {
+            'values': {
+                'ColumnDesc': 'mapItem',
+            },
+            'attributes': {
+                'ColumnCode': ('mapItem', 'coaItem'),
+                'StatementType': ('mapItem', 'statementType'),
+                'lineID': ('mapItem', 'lineID'),
+                'precision': ('mapItem', 'precision'),
+            }
+        }
+        return self._xml_processor(self.tree, 'FinancialStatements/COAMap', fs_mappings)
+    
+    def process_financial_statements_helper(self, periodType = 'Annual', statementType = 'INC'):
+        # The financial statements are too deeply nested to be processed by the xml processor.
+        # Therefor, we will traverse the statements and hand over to the xml processor for the final step.
+        
+        # First, let's get the possible columns for all types of financial statements:
+        mapitems = self.tree.findall(f"FinancialStatements/COAMap/mapItem[@statementType='{statementType}']")
+        coaitems = []
+
+        for map in mapitems:
+            coaitems += [map.attrib['coaItem']]
+
+        dfs = []
+        
+        itemlevel_mappings = {
+            'values': {
+                f"{coacode}": f"lineItem[@coaCode='{coacode}']" for coacode in coaitems
+            },
+            'attributes': {
+                'periodTypeCode': ('FPHeader/periodType', 'Code'),
+                'UpdateTypeCode': ('FPHeader/UpdateType', 'Code'),
+                'SourceDate': ('FPHeader/Source', 'Date'),
+            }
+        }
+        itemlevel_mappings['values'].update({
+                'PeriodLength': 'FPHeader/PeriodLength',
+                'periodType': 'FPHeader/periodType',
+                'UpdateType': 'FPHeader/UpdateType',
+                'StatementDate': 'FPHeader/StatementDate',
+                'Source': 'FPHeader/Source',
+        })
+        itemlevel_attribs = {
+                    'StatementType': 'Type'
+        }
+
+        # Second, let's get the actual fiscal periods. We need to iterate those, because there are some attributes we want to add to this dataset:
+        fiscalperiods = self.tree.findall(f'FinancialStatements/{periodType}Periods/FiscalPeriod[@Type="{periodType}"]')
+        for f in fiscalperiods:
+            fixed_columns = {'FiscalPeriodType': f.attrib['Type'], 'FiscalPeriodEndDate': f.attrib['EndDate'], 'FiscalPeriodYear': f.attrib['FiscalYear'], 'FiscalPeriodNumber': f.attrib['FiscalPeriodNumber']}
+            dfs += [ self._xml_processor(f, f"Statement[@Type='{statementType}']", itemlevel_mappings, itemlevel_attribs, fixed_columns) ]
+        
+        # Concatenate all dataframes
+        return pd.concat(dfs)
+
+    def process_balance_sheet_annual(self):
+        return self.process_financial_statements_helper('Annual', 'BAL')
+    
+    def process_income_statement_annual(self):
+        return self.process_financial_statements_helper('Annual', 'INC')
+
+    def process_cash_flow_annual(self):
+        return self.process_financial_statements_helper('Annual', 'CAS')
+
+    def process_balance_sheet_interim(self):
+        return self.process_financial_statements_helper('Interim', 'BAL')
+    
+    def process_income_statement_interim(self):
+        return self.process_financial_statements_helper('Interim', 'INC')
+
+    def process_cash_flow_interim(self):
+        return self.process_financial_statements_helper('Interim', 'CAS')
 class process_RESC():
     def __init__(self, xml_file):
         self.tree = ET.parse(xml_file)
