@@ -26,12 +26,13 @@ def process_RESC(xml_file):
     # 4. Actuals
     # 5. Consensus estimates (fiscal year; net profit)
 
-    def xml_processor_helper(rootelementpath: str, mappings: dict, toplevelattributes: dict = {}, fixed_columns: dict = {}):
+    def xml_processor_helper(rootelementpath: str, mappings: dict = {'values': {}, 'attributes': {}}, toplevelattributes: dict = {}, fixed_columns: dict = {}):
         collection = tree.findall(rootelementpath)
 
         columns = list(mappings['values'].keys()) + list(mappings['attributes'].keys()) + list(toplevelattributes.keys()) + list(fixed_columns.keys())
         column_data = {c: [] for c in columns}
 
+        rowno = 1
         for el in collection:
             for key, value in mappings['values'].items():
                 column_data[key] += [ e.text for e in el.findall(value)]
@@ -41,16 +42,17 @@ def process_RESC(xml_file):
 
             # Fill top level attributes for every row that is added:
             for key, value in toplevelattributes.items():
-                column_data[key] += [ el.attrib[value] ] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+                column_data[key] += [ el.attrib[value] ] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
             
             # Fill fixed column values for every row that is added:
             for key, value in fixed_columns.items():
-                column_data[key] += [ value ] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+                column_data[key] += [ value ] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
             
             # Insert empty column values for columns that are not filled in this iteration:
             for key in column_data:
-                column_data[key] += [None] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
-        
+                column_data[key] += [None] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
+            rowno += 1
+
         # Fill dataframe:
         df = pd.DataFrame(columns=columns)
         for c in columns:
@@ -92,7 +94,6 @@ def process_RESC(xml_file):
     Currently however, it's done for a single company.
     """
     def process_company_profile(tree, ticker):
-        company_els = tree.findall('Company')
         column_mapping_companyInfo = {
             'values': {
                 'name': 'CoName/Name',
@@ -113,38 +114,20 @@ def process_RESC(xml_file):
             },
         }
 
-        columns = ['ticker'] + list(column_mapping_companyInfo['values'].keys()) + list(column_mapping_companyInfo['attributes'].keys())
-        column_data = {c: [] for c in columns}
+        return xml_processor_helper('Company', column_mapping_companyInfo, fixed_columns={'ticker': ticker})
 
-        for company in company_els:
-            for key, value in column_mapping_companyInfo['values'].items():
-                column_data[key] += [ e.text for e in company.findall(value)]
-                
-            for key, (value, attribute) in column_mapping_companyInfo['attributes'].items():
-                column_data[key] += [ e.attrib[attribute] for e in company.findall(value)]
-
-            column_data['ticker'] += [ticker] * (len(column_data[key]) - len(column_data['ticker']))
-            
-        # Fill dataframe:
-        df = pd.DataFrame(columns=columns)
-        for c in columns:
-            df[c] = column_data[c]
-
-        return df
     """
     3a. Process periods (annual)
     """
     def process_periods_annual(tree, ticker):
-        company_el = tree.find('Company')
-        attrib_list = 'fYear', 'periodLength', 'periodUnit', 'endMonth', 'fyNum'
+        column_mapping_companyInfo = {
+            'values': {}, 
+            'attributes': {},
+        }
+        attrib_list = {'fYear': 'fYear', 'periodLength': 'periodLength', 'periodUnit': 'periodUnit', 'endMonth': 'endMonth', 'fyNum': 'fyNum'}
 
-        df = pd.DataFrame(columns=attrib_list)
 
-        for a in attrib_list:
-            df[a] = [ e.attrib[a] for e in company_el.findall('CompanyInfo/CompanyPeriods/Annual') ]
-
-        df['ticker'] = [ticker] * len(df)
-        return df
+        return xml_processor_helper('Company/CompanyInfo/CompanyPeriods/Annual', fixed_columns={'ticker': ticker}, toplevelattributes=attrib_list)
 
     """
     3b. Process periods (interim)
@@ -176,27 +159,7 @@ def process_RESC(xml_file):
                 'updated': (f"FYPeriod[@periodType='{periodType}']/ActValue", 'updated')
             },
         }
-        
-        # Create all the columns:
-        columns = ['ticker', 'actualType', 'actualUnit'] + list(actual_mappings['values'].keys()) + list(actual_mappings['attributes'].keys())
-        column_data = {c: [] for c in columns}
-
-        for fyactual in actuals:
-            for key, value in actual_mappings['values'].items():
-                column_data[key] += [ e.text for e in fyactual.findall(value)]
-                
-            for key, (value, attribute) in actual_mappings['attributes'].items():
-                column_data[key] += [ e.attrib[attribute] for e in fyactual.findall(value)]
-
-            column_data['ticker'] += [ticker] * (len(column_data[key]) - len(column_data['ticker']))
-            column_data['actualType'] += [fyactual.attrib['type']] * (len(column_data[key]) - len(column_data['actualType']))
-            column_data['actualUnit'] += [fyactual.attrib['unit']]  * (len(column_data[key]) - len(column_data['actualUnit']))
-
-        # Fill dataframe:
-        df = pd.DataFrame(columns=columns)
-        for c in columns:
-            df[c] = column_data[c]
-        return df
+        return xml_processor_helper('Actuals/FYActuals/FYActual', actual_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'actualType': 'type', 'actualUnit': 'unit'})
     
     def process_actuals_annual(tree, ticker):
         return process_actuals_helper(tree, ticker, 'A')
