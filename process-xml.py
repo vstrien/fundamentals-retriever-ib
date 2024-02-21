@@ -16,17 +16,11 @@ def process_ReportsFinStatements(xml_file):
 
 
 
-def process_RESC(xml_file):
-    tree = ET.parse(xml_file)
-    # RESC has several sources of information:
+class process_RESC():
+    def __init__(self, xml_file):
+        self.tree = ET.parse(xml_file)
 
-    # 1. Security Info
-    # 2. Company profile
-    # 3. Periods
-    # 4. Actuals
-    # 5. Consensus estimates (fiscal year; net profit)
-
-    def xml_processor_helper(tree, rootelementpath: str, mappings: dict = {'values': {}, 'attributes': {}}, toplevelattributes: dict = {}, fixed_columns: dict = {}):
+    def _xml_processor(self, tree, rootelementpath: str, mappings: dict = {'values': {}, 'attributes': {}}, toplevelattributes: dict = {}, fixed_columns: dict = {}):
         collection = tree.findall(rootelementpath)
 
         columns = list(mappings['values'].keys()) + list(mappings['attributes'].keys()) + list(toplevelattributes.keys()) + list(fixed_columns.keys())
@@ -62,7 +56,7 @@ def process_RESC(xml_file):
     """
     1. Process security info
     """
-    def process_security_info(tree):
+    def process_security_info(self):
 
         security_mappings = {
             'values': {
@@ -86,14 +80,15 @@ def process_RESC(xml_file):
                 '52WKLOW_CurrCode': (f"MarketData/MarketDataItem[@type='52WKLOW']", 'currCode'),
             },
         }
-        return xml_processor_helper(tree, 'Company/SecurityInfo/Security', security_mappings, toplevelattributes={'code': 'code'})
+        
+        return self._xml_processor(self.tree, 'Company/SecurityInfo/Security', security_mappings, toplevelattributes={'code': 'code'})
 
     """
     2. Process company profile
     This should in the future done reversely: for all companies, get the company profile and store it in a single dataframe
     Currently however, it's done for a single company.
     """
-    def process_company_profile(tree, ticker):
+    def process_company_profile(self, ticker):
         column_mapping_companyInfo = {
             'values': {
                 'name': 'CoName/Name',
@@ -114,28 +109,28 @@ def process_RESC(xml_file):
             },
         }
 
-        return xml_processor_helper(tree, 'Company', column_mapping_companyInfo, fixed_columns={'ticker': ticker})
+        return self._xml_processor(self.tree, 'Company', column_mapping_companyInfo, fixed_columns={'ticker': ticker})
 
     """
     3a. Process periods (annual)
     """
-    def process_periods_annual(tree, ticker):
+    def process_periods_annual(self, ticker):
         attrib_list = {'fYear': 'fYear', 'periodLength': 'periodLength', 'periodUnit': 'periodUnit', 'endMonth': 'endMonth', 'fyNum': 'fyNum'}
 
-        return xml_processor_helper(tree, 'Company/CompanyInfo/CompanyPeriods/Annual', fixed_columns={'ticker': ticker}, toplevelattributes=attrib_list)
+        return self._xml_processor(self.tree, 'Company/CompanyInfo/CompanyPeriods/Annual', fixed_columns={'ticker': ticker}, toplevelattributes=attrib_list)
 
     """
     3b. Process periods (interim)
     """
-    def process_periods_interim(tree, ticker):
+    def process_periods_interim(self, ticker):
         attrib_list = {'type': 'type', 'periodNum': 'periodNum', 'periodLength': 'periodLength', 'periodUnit': 'periodUnit', 'endMonth': 'endMonth', 'endCalYear': 'endCalYear'}
 
-        return xml_processor_helper(tree, 'Company/CompanyInfo/CompanyPeriods/Annual/Interim', fixed_columns={'ticker': ticker}, toplevelattributes=attrib_list)
+        return self._xml_processor(self.tree, 'Company/CompanyInfo/CompanyPeriods/Annual/Interim', fixed_columns={'ticker': ticker}, toplevelattributes=attrib_list)
 
     """
     4a. Process actuals (annual)
     """
-    def process_actuals_helper(tree, ticker, periodType):
+    def process_actuals_helper(self, ticker, periodType):
         actual_mappings = {
             'values': {
                 'ActValue': f"FYPeriod[@periodType='{periodType}']/ActValue",
@@ -147,21 +142,21 @@ def process_RESC(xml_file):
                 'updated': (f"FYPeriod[@periodType='{periodType}']/ActValue", 'updated')
             },
         }
-        return xml_processor_helper('Actuals/FYActuals/FYActual', actual_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'actualType': 'type', 'actualUnit': 'unit'})
+        return self._xml_processor(self.tree, 'Actuals/FYActuals/FYActual', actual_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'actualType': 'type', 'actualUnit': 'unit'})
     
-    def process_actuals_annual(tree, ticker):
-        return process_actuals_helper(tree, ticker, 'A')
+    def process_actuals_annual(self, ticker):
+        return self.process_actuals_helper(ticker, 'A')
 
     """
     4b. Process actuals (interim)
     """
-    def process_actuals_interim(tree, ticker):
-        return process_actuals_helper(tree, ticker, 'Q')
+    def process_actuals_interim(self, ticker):
+        return self.process_actuals_helper(ticker, 'Q')
     
     """
     5a. Fiscal Year Estimates 
     """
-    def process_fiscal_year_estimates_helper(tree, ticker, periodType='A'):
+    def process_fiscal_year_estimates_helper(self, ticker, periodType='A'):
         fy_itemlevel_mappings = {
                     'values': {
                         'high_curr': f"ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
@@ -182,31 +177,30 @@ def process_RESC(xml_file):
                     }
         # Voor de helper stapt deze een niveau te hoog in. De FYEstimate heeft namelijk per FYPeriod verschillende aantallen waarden.
         # Daarom halen we eerst de algemene attributen van FYEstimate op. Daarna gaan we een niveau dieper.
-        fyestimates = tree.findall(f"ConsEstimates/FYEstimates/FYEstimate")
+        fyestimates = self.tree.findall(f"ConsEstimates/FYEstimates/FYEstimate")
         
         dfs = []
 
         for f in fyestimates:
             extra_fixed_columns = {'ticker': ticker, 'type': f.attrib['type'], 'unit': f.attrib['unit']}
 
-            dfs += [ xml_processor_helper(f, f"FYPeriod[@periodType='{periodType}']", fy_itemlevel_mappings, fy_itemlevel_attribs, extra_fixed_columns) ]
+            dfs += [ self._xml_processor(f, f"FYPeriod[@periodType='{periodType}']", fy_itemlevel_mappings, fy_itemlevel_attribs, extra_fixed_columns) ]
 
         # Concatenate all dataframes
         return pd.concat(dfs)
     
         
 
-    def process_fiscal_year_estimates_annual(tree, ticker):
-        return process_fiscal_year_estimates_helper(tree, ticker, 'A')
+    def process_fiscal_year_estimates_annual(self, ticker):
+        return self.process_fiscal_year_estimates_helper(ticker, 'A')
 
-    def process_fiscal_year_estimates_interim(tree, ticker):
-        return process_fiscal_year_estimates_helper(tree, ticker, 'Q')
+    def process_fiscal_year_estimates_interim(self, ticker):
+        return self.process_fiscal_year_estimates_helper(ticker, 'Q')
 
     """
     5b. Net Profit Estimates
     """
-    def process_net_profit_estimates(tree, ticker):
-        estimates = tree.findall(f"ConsEstimates/NPEstimates/NPEstimate")
+    def process_net_profit_estimates(self, ticker):
         estimate_mappings = {
             'values': {
                 'high_curr': f"ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
@@ -217,10 +211,8 @@ def process_RESC(xml_file):
             'attributes': {}
         }
         
-        return xml_processor_helper(tree, 'ConsEstimates/NPEstimates/NPEstimate', estimate_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'type': 'type', 'unit': 'unit'})
+        return self._xml_processor(self.tree, 'ConsEstimates/NPEstimates/NPEstimate', estimate_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'type': 'type', 'unit': 'unit'})
 
-    # Process the XML file
-    process_company_profile(tree)
 
 def process_ReportSnapshot(xml_file):
     return
