@@ -328,14 +328,113 @@ class process_RESC(ib_xml_processor):
         return self._xml_processor(self.tree, 'ConsEstimates/NPEstimates/NPEstimate', estimate_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'type': 'type', 'unit': 'unit'})
 
 
-def process_ReportSnapshot(xml_file):
-    return
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+class process_ReportSnapshot(ib_xml_processor):
+    def __init__(self, xml_file):
+        super().__init__(xml_file)
+    
+    def process_toplevel_info(self):
+        toplevel_mappings = {
+            'values': {
+                'RepNo': 'CoIDs/CoID[@Type="RepNo"]',
+                'CompanyName': 'CoIDs/CoID[@Type="CompanyName"]',
+                'IRSNo': 'CoIDs/CoID[@Type="IRSNo"]',
+                'CIKNo': 'CoIDs/CoID[@Type="CIKNo"]',
+                'OrganizationPermID': 'CoIDs/CoID[@Type="OrganizationPermID"]',
+                'LatestAvailableAnnual': 'CoGeneralInfo/LatestAvailableAnnual',
+                'LatestAvailableInterim': 'CoGeneralInfo/LatestAvailableInterim',
+                'ReportingCurrency': 'CoGeneralInfo/ReportingCurrency',
+                'SharesOutstanding': 'CoGeneralInfo/SharesOut',
+                'Business Summary': 'TextInfo/Text[@Type="Business Summary"]',
+                'Financial Summary': 'TextInfo/Text[@Type="Financial Summary"]',
+                'IndustryInfo_TRBC': 'peerInfo/IndustryInfo/Industry[@type="TRBC"][@order="1"]',
+                'IndustryInfo_NAICS_1': 'peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="1"]',
+                'IndustryInfo_NAICS_2': 'peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="2"]',
+                'IndustryInfo_NAICS_3': 'peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="3"]',
+                'IndustryInfo_NAICS_4': 'peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="4"]',
+                'IndustryInfo_NAICS_5': 'peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="5"]',
+                'IndustryInfo_SIC_1': 'peerInfo/IndustryInfo/Industry[@type="SIC"][@order="1"]',
+                'IndustryInfo_SIC_2': 'peerInfo/IndustryInfo/Industry[@type="SIC"][@order="2"]',
+                'IndustryInfo_SIC_3': 'peerInfo/IndustryInfo/Industry[@type="SIC"][@order="3"]',
+                'IndustryInfo_SIC_4': 'peerInfo/IndustryInfo/Industry[@type="SIC"][@order="4"]',
+                'IndustryInfo_SIC_5': 'peerInfo/IndustryInfo/Industry[@type="SIC"][@order="5"]',
+                'website': 'webLinks/webSite[@mainCategory="Home Page"]',
+                'email': 'webLinks/webSite[@mainCategory="Company Contact/E-mail"]'
+            },
+            'attributes': {
+                'CashFlowMethodCode': ('StatementInfo/CashFlowMethod', 'Code'),
+                'BlanceSheetDisplayCode': ('StatementInfo/BalanceSheetDisplay', 'Code'),
+                'COATypeCode': ('StatementInfo/COAType', 'Code'),
+                'IndustryInfo_lastUpdated': ('peerInfo', 'lastUpdated'),
+                'IndustryInfo_lastUpdated': ('peerInfo', 'lastUpdated'),
+                'IndustryInfo_TRBC_Code': ('peerInfo/IndustryInfo/Industry[@type="TRBC"][@order="1"]', 'code'),
+                'IndustryInfo_NAICS_1_Code': ('peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="1"]', 'code'),
+                'IndustryInfo_NAICS_2_Code': ('peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="2"]', 'code'),
+                'IndustryInfo_NAICS_3_Code': ('peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="3"]', 'code'),
+                'IndustryInfo_NAICS_4_Code': ('peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="4"]', 'code'),
+                'IndustryInfo_NAICS_5_Code': ('peerInfo/IndustryInfo/Industry[@type="NAICS"][@order="5"]', 'code'),
+                'IndustryInfo_SIC_1Code': ('peerInfo/IndustryInfo/Industry[@type="SIC"][@order="1"]', 'code'),
+                'IndustryInfo_SIC_2Code': ('peerInfo/IndustryInfo/Industry[@type="SIC"][@order="2"]', 'code'),
+                'IndustryInfo_SIC_3Code': ('peerInfo/IndustryInfo/Industry[@type="SIC"][@order="3"]', 'code'),
+                'IndustryInfo_SIC_4Code': ('peerInfo/IndustryInfo/Industry[@type="SIC"][@order="4"]', 'code'),
+                'IndustryInfo_SIC_5Code': ('peerInfo/IndustryInfo/Industry[@type="SIC"][@order="5"]', 'code'),
+            }
+        }
+        return self._xml_processor(self.tree, '.', mappings=toplevel_mappings)
 
-    for child in root:
-        print(child.tag, child.attrib)
+    def process_issues(self):
+        toplevel_mappings = {
+            'values': {
+                'Issue Name': 'IssueID[@Type="Name"]',
+                'Issue Ticker': 'IssueID[@Type="Ticker"]',
+                'Issue RIC': 'IssueID[@Type="RIC"]',
+                'Issue DisplayRIC': 'IssueID[@Type="DisplayRIC"]',
+                'Issue InstrumentPI': 'IssueID[@Type="InstrumentPI"]',
+                'Issue QuotePI': 'IssueID[@Type="QuotePI"]',
+                'Issue InstrumentPermID': 'IssueID[@Type="InstrumentPermID"]',
+                'Issue QuotePermID': 'IssueID[@Type="QuotePermID"]',
+                'Issue Exchange': 'Exchange',
+                'Issue MostRecentSplit': 'MostRecentSplit',
+            },
+            'attributes': {
+                'ExchangeCode': ('Exchange', 'Code'),
+                'ExchangeCountry': ('Exchange', 'Country'),
+                'MostRecentSplit Date': ('MostRecentSplit', 'Date'),
+            }
+        }
+        return self._xml_processor(self.tree, 'Issues/Issue', toplevel_mappings, toplevelattributes={'IssueID': 'ID', 'IssueType': 'Type', 'IssueDesc': 'Desc', 'IssueOrder': 'Order'})
 
+    def process_ratios(self):
+        toplevel_mappings = {
+            'values': {
+                'NPRICE'   : 'Group[@ID="Price and Volume"]/Ratio[@FieldName="NPRICE"   ]',
+                "NHIG"     : 'Group[@ID="Price and Volume"]/Ratio[@FieldName="NHIG"     ]',
+                "NLOW"     : 'Group[@ID="Price and Volume"]/Ratio[@FieldName="NLOW"     ]',
+                "PDATE"    : 'Group[@ID="Price and Volume"]/Ratio[@FieldName="PDATE"    ]',
+                "VOL10DAVG": 'Group[@ID="Price and Volume"]/Ratio[@FieldName="VOL10DAVG"]',
+                "EV"       : 'Group[@ID="Price and Volume"]/Ratio[@FieldName="EV"       ]',
+
+                "MKTCAP"  : 'Group[@ID="Income Statement"]/Ratio[@FieldName="MKTCAP"  ]',
+                "TTMREV"  : 'Group[@ID="Income Statement"]/Ratio[@FieldName="TTMREV"  ]',
+                "TTMEBITD": 'Group[@ID="Income Statement"]/Ratio[@FieldName="TTMEBITD"]',
+                "TTMNIAC" : 'Group[@ID="Income Statement"]/Ratio[@FieldName="TTMNIAC" ]',
+
+                "TTMEPSXCLX": 'Group[@ID="Per share data"]/Ratio[@FieldName="TTMEPSXCLX"]',
+                "TTMREVPS"  : 'Group[@ID="Per share data"]/Ratio[@FieldName="TTMREVPS"  ]',
+                "QBVPS"     : 'Group[@ID="Per share data"]/Ratio[@FieldName="QBVPS"     ]',
+                "QCSHPS"    : 'Group[@ID="Per share data"]/Ratio[@FieldName="QCSHPS"    ]',
+                "TTMCFSHR"  : 'Group[@ID="Per share data"]/Ratio[@FieldName="TTMCFSHR"  ]',
+                "TTMDIVSHR" : 'Group[@ID="Per share data"]/Ratio[@FieldName="TTMDIVSHR" ]',
+
+                "TTMGROSMGN": 'Group[@ID="Other Ratios"]/Ratio[@FieldName="TTMGROSMGN"]',
+                "TTMROEPCT" : 'Group[@ID="Other Ratios"]/Ratio[@FieldName="TTMROEPCT" ]',
+                "TTMPR2REV" : 'Group[@ID="Other Ratios"]/Ratio[@FieldName="TTMPR2REV" ]',
+                "PEEXCLXOR" : 'Group[@ID="Other Ratios"]/Ratio[@FieldName="PEEXCLXOR" ]',
+                "PRICE2BK"  : 'Group[@ID="Other Ratios"]/Ratio[@FieldName="PRICE2BK"  ]',
+                "Employees" : 'Group[@ID="Other Ratios"]/Ratio[@FieldName="Employees" ]',
+            },
+            'attributes': {}
+        }
+        return self._xml_processor(self.tree, 'Ratios', toplevel_mappings, toplevelattributes={'PriceCurrency': 'PriceCurrency', 'ReportingCurrency': 'ReportingCurrency', 'ExchangeRate': 'ExchangeRate', 'LatestAvailableDate': 'LatestAvailableDate'})
 
 functionmapping = {
     'ReportsFinStatements': process_ReportsFinStatements
