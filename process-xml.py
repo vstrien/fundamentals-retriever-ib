@@ -6,7 +6,7 @@ import pandas as pd
 # list all subdirectories in the "fundamentals" directory
 companies = [ name for name in os.listdir('fundamentals') if os.path.isdir(os.path.join('fundamentals', name)) ]
 
-class process_ReportsFinStatements():
+class ib_xml_processor():
     def __init__(self, xml_file):
         self.tree = ET.parse(xml_file)
 
@@ -42,6 +42,10 @@ class process_ReportsFinStatements():
         for c in columns:
             df[c] = column_data[c]
         return df
+
+class process_ReportsFinStatements(ib_xml_processor):
+    def __init__(self, xml_file):
+        super().__init__(xml_file)
     
     def process_toplevel_info(self):
         toplevel_mappings = {
@@ -159,42 +163,9 @@ class process_ReportsFinStatements():
 
     def process_cash_flow_interim(self):
         return self.process_financial_statements_helper('Interim', 'CAS')
-class process_RESC():
+class process_RESC(ib_xml_processor):
     def __init__(self, xml_file):
-        self.tree = ET.parse(xml_file)
-
-    def _xml_processor(self, tree, rootelementpath: str, mappings: dict = {'values': {}, 'attributes': {}}, toplevelattributes: dict = {}, fixed_columns: dict = {}):
-        collection = tree.findall(rootelementpath)
-
-        columns = list(mappings['values'].keys()) + list(mappings['attributes'].keys()) + list(toplevelattributes.keys()) + list(fixed_columns.keys())
-        column_data = {c: [] for c in columns}
-
-        rowno = 1
-        for el in collection:
-            for key, value in mappings['values'].items():
-                column_data[key] += [ e.text for e in el.findall(value)]
-                
-            for key, (value, attribute) in mappings['attributes'].items():
-                column_data[key] += [ e.attrib[attribute] for e in el.findall(value)]
-
-            # Fill top level attributes for every row that is added:
-            for key, value in toplevelattributes.items():
-                column_data[key] += [ el.attrib[value] ] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
-            
-            # Fill fixed column values for every row that is added:
-            for key, value in fixed_columns.items():
-                column_data[key] += [ value ] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
-            
-            # Insert empty column values for columns that are not filled in this iteration:
-            for key in column_data:
-                column_data[key] += [None] * (max([len(a) for a in column_data.values()] + [rowno]) - len(column_data[key]))
-            rowno += 1
-
-        # Fill dataframe:
-        df = pd.DataFrame(columns=columns)
-        for c in columns:
-            df[c] = column_data[c]
-        return df
+        super().__init__(xml_file)
     
     """
     1. Process security info
