@@ -103,7 +103,7 @@ class process_ReportsFinStatements(ib_xml_processor):
         }
         return self._xml_processor(self.tree, 'FinancialStatements/COAMap', fs_mappings)
     
-    def process_financial_statements_helper(self, periodType = 'Annual', statementType = 'INC'):
+    def _process_financial_statements_helper(self, periodType = 'Annual', statementType = 'INC'):
         # The financial statements are too deeply nested to be processed by the xml processor.
         # Therefor, we will traverse the statements and hand over to the xml processor for the final step.
         
@@ -147,22 +147,22 @@ class process_ReportsFinStatements(ib_xml_processor):
         return pd.concat(dfs)
 
     def process_balance_sheet_annual(self):
-        return self.process_financial_statements_helper('Annual', 'BAL')
+        return self._process_financial_statements_helper('Annual', 'BAL')
     
     def process_income_statement_annual(self):
-        return self.process_financial_statements_helper('Annual', 'INC')
+        return self._process_financial_statements_helper('Annual', 'INC')
 
     def process_cash_flow_annual(self):
-        return self.process_financial_statements_helper('Annual', 'CAS')
+        return self._process_financial_statements_helper('Annual', 'CAS')
 
     def process_balance_sheet_interim(self):
-        return self.process_financial_statements_helper('Interim', 'BAL')
+        return self._process_financial_statements_helper('Interim', 'BAL')
     
     def process_income_statement_interim(self):
-        return self.process_financial_statements_helper('Interim', 'INC')
+        return self._process_financial_statements_helper('Interim', 'INC')
 
     def process_cash_flow_interim(self):
-        return self.process_financial_statements_helper('Interim', 'CAS')
+        return self._process_financial_statements_helper('Interim', 'CAS')
 class process_RESC(ib_xml_processor):
     def __init__(self, xml_file):
         super().__init__(xml_file)
@@ -244,7 +244,7 @@ class process_RESC(ib_xml_processor):
     """
     4a. Process actuals (annual)
     """
-    def process_actuals_helper(self, ticker, periodType):
+    def _process_actuals_helper(self, ticker, periodType):
         actual_mappings = {
             'values': {
                 'ActValue': f"FYPeriod[@periodType='{periodType}']/ActValue",
@@ -259,18 +259,18 @@ class process_RESC(ib_xml_processor):
         return self._xml_processor(self.tree, 'Actuals/FYActuals/FYActual', actual_mappings, fixed_columns={'ticker': ticker}, toplevelattributes={'actualType': 'type', 'actualUnit': 'unit'})
     
     def process_actuals_annual(self, ticker):
-        return self.process_actuals_helper(ticker, 'A')
+        return self._process_actuals_helper(ticker, 'A')
 
     """
     4b. Process actuals (interim)
     """
     def process_actuals_interim(self, ticker):
-        return self.process_actuals_helper(ticker, 'Q')
+        return self._process_actuals_helper(ticker, 'Q')
     
     """
     5a. Fiscal Year Estimates 
     """
-    def process_fiscal_year_estimates_helper(self, ticker, periodType='A'):
+    def _process_fiscal_year_estimates_helper(self, ticker, periodType='A'):
         fy_itemlevel_mappings = {
                     'values': {
                         'high_curr': f"ConsEstimate[@type='High']/ConsValue[@dateType='CURR']",
@@ -306,10 +306,10 @@ class process_RESC(ib_xml_processor):
         
 
     def process_fiscal_year_estimates_annual(self, ticker):
-        return self.process_fiscal_year_estimates_helper(ticker, 'A')
+        return self._process_fiscal_year_estimates_helper(ticker, 'A')
 
     def process_fiscal_year_estimates_interim(self, ticker):
-        return self.process_fiscal_year_estimates_helper(ticker, 'Q')
+        return self._process_fiscal_year_estimates_helper(ticker, 'Q')
 
     """
     5b. Net Profit Estimates
@@ -436,11 +436,39 @@ class process_ReportSnapshot(ib_xml_processor):
         }
         return self._xml_processor(self.tree, 'Ratios', toplevel_mappings, toplevelattributes={'PriceCurrency': 'PriceCurrency', 'ReportingCurrency': 'ReportingCurrency', 'ExchangeRate': 'ExchangeRate', 'LatestAvailableDate': 'LatestAvailableDate'})
 
+    def process_forecast_data(self):
+        toplevel_mappings = {
+            'values': {
+                'ConsRecom': 'Ratio[@FieldName="ConsRecom"]/Value[@PeriodType="CURR"]',
+                'TargetPrice': 'Ratio[@FieldName="TargetPrice"]/Value[@PeriodType="CURR"]',
+                'ProjLTGrowthRate': 'Ratio[@FieldName="ProjLTGrowthRate"]/Value[@PeriodType="CURR"]',
+                'ProjPE': 'Ratio[@FieldName="ProjPE"]/Value[@PeriodType="CURR"]',
+                'ProjSales': 'Ratio[@FieldName="ProjSales"]/Value[@PeriodType="CURR"]',
+                'ProjSalesQ': 'Ratio[@FieldName="ProjSalesQ"]/Value[@PeriodType="CURR"]',
+                'ProjEPS': 'Ratio[@FieldName="ProjEPS"]/Value[@PeriodType="CURR"]',
+                'ProjEPSQ': 'Ratio[@FieldName="ProjEPSQ"]/Value[@PeriodType="CURR"]',
+                'ProjProfit': 'Ratio[@FieldName="ProjProfit"]/Value[@PeriodType="CURR"]',
+                'ProjDPS': 'Ratio[@FieldName="ProjDPS"]/Value[@PeriodType="CURR"]',
+            },
+            'attributes': {}
+        }
+        return self._xml_processor(self.tree, 'ForecastData', toplevel_mappings, toplevelattributes={'ConsensusType': 'ConsensusType', 'CurFiscalYear': 'CurFiscalYear', 'CurFiscalYearEndMonth': 'CurFiscalYearEndMonth', 'CurInterimEndCalYear': 'CurInterimEndCalYear', 'CurInterimEndMonth': 'CurInterimEndMonth', 'EarningsBasis': 'EarningsBasis'})
+
 functionmapping = {
-    'ReportsFinStatements': process_ReportsFinStatements
+    'ReportsFinStatements': process_ReportsFinStatements,
+    'RESC': process_RESC,
+    'ReportSnapshot': process_ReportSnapshot
 }
 
 for comp in companies:
     for report in os.listdir(f'./fundamentals/{comp}'):
         if report.endswith('.xml'):
-            functionmapping[report.split('.')[0]](f'./fundamentals/{comp}/{report}')
+            process = functionmapping[report.split('.')[0]](f'./fundamentals/{comp}/{report}')
+            
+            # Get all functions from the object 'process' that start with 'process_'
+            functions = [f for f in dir(process) if f.startswith('process_')]
+            for f in functions:
+                print(f'Processing {comp} - {report} - {f}')
+                df = getattr(process, f)()
+                df.to_parquet(f'./fundamentals/{comp}/{report.split(".")[0]}_{f}.parquet')
+                print(f'Processed {comp} - {report} - {f}')
