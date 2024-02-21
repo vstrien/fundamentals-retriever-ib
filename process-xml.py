@@ -18,7 +18,6 @@ def process_ReportsFinStatements(xml_file):
 
 def process_RESC(xml_file):
     tree = ET.parse(xml_file)
-    root = tree.getroot()
     # RESC has several sources of information:
 
     # 1. Security Info
@@ -27,11 +26,42 @@ def process_RESC(xml_file):
     # 4. Actuals
     # 5. Consensus estimates (fiscal year; net profit)
 
+    def xml_processor_helper(rootelementpath: str, mappings: dict, toplevelattributes: dict = {}, fixed_columns: dict = {}):
+        collection = tree.findall(rootelementpath)
+
+        columns = list(mappings['values'].keys()) + list(mappings['attributes'].keys()) + list(toplevelattributes.keys()) + list(fixed_columns.keys())
+        column_data = {c: [] for c in columns}
+
+        for el in collection:
+            for key, value in mappings['values'].items():
+                column_data[key] += [ e.text for e in el.findall(value)]
+                
+            for key, (value, attribute) in mappings['attributes'].items():
+                column_data[key] += [ e.attrib[attribute] for e in el.findall(value)]
+
+            # Fill top level attributes for every row that is added:
+            for key, value in toplevelattributes.items():
+                column_data[key] += [ el.attrib[value] ] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+            
+            # Fill fixed column values for every row that is added:
+            for key, value in fixed_columns.items():
+                column_data[key] += [ value ] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+            
+            # Insert empty column values for columns that are not filled in this iteration:
+            for key in column_data:
+                column_data[key] += [None] * (max([len(a) for a in column_data.values()]) - len(column_data[key]))
+        
+        # Fill dataframe:
+        df = pd.DataFrame(columns=columns)
+        for c in columns:
+            df[c] = column_data[c]
+        return df
+    
     """
     1. Process security info
     """
     def process_security_info(tree):
-        security_els = tree.findall('Company/SecurityInfo/Security')
+
         security_mappings = {
             'values': {
                 'ISIN': f"SecIds/SecId[@type='ISIN']",
@@ -54,23 +84,7 @@ def process_RESC(xml_file):
                 '52WKLOW_CurrCode': (f"MarketData/MarketDataItem[@type='52WKLOW']", 'currCode'),
             },
         }
-        columns = ['code'] + list(security_mappings['values'].keys()) + list(security_mappings['attributes'].keys())
-        column_data = {c: [] for c in columns}
-
-        for security in security_els:
-            for key, value in security_mappings['values'].items():
-                column_data[key] += [ e.text for e in security.findall(value)]
-                
-            for key, (value, attribute) in security_mappings['attributes'].items():
-                column_data[key] += [ e.attrib[attribute] for e in security.findall(value)]
-
-            column_data['code'] += [security.attrib['code']] * (len(column_data[key]) - len(column_data['code']))
-
-        # Fill dataframe:
-        df = pd.DataFrame(columns=columns)
-        for c in columns:
-            df[c] = column_data[c]
-        return df
+        return xml_processor_helper('Company/SecurityInfo/Security', security_mappings, toplevelattributes={'code': 'code'})
 
     """
     2. Process company profile
