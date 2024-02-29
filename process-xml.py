@@ -10,6 +10,8 @@ class ib_xml_processor():
     def __init__(self, xml_file):
         self.tree = ET.parse(xml_file)
 
+        self.processing_methods = {}
+
     def _xml_processor(self, tree, rootelementpath: str, mappings: dict = {'values': {}, 'attributes': {}}, toplevelattributes: dict = {}, fixed_columns: dict = {}):
         collection = tree.findall(rootelementpath)
 
@@ -39,14 +41,27 @@ class ib_xml_processor():
 
         # Fill dataframe:
         df = pd.DataFrame(columns=columns)
+
         for c in columns:
             df[c] = column_data[c]
         return df
 
-class process_ReportsFinStatements(ib_xml_processor):
+class ReportsFinStatements_Processor(ib_xml_processor):
     def __init__(self, xml_file):
         super().__init__(xml_file)
+        self.processing_methods = {
+            'toplevel_info': self.process_toplevel_info,
+            'issues': self.process_issues,
+            'financial_statement_column_mapping': self.process_financial_statement_column_mapping,
+            'balance_sheet_annual': self.process_balance_sheet_annual,
+            'income_statement_annual': self.process_income_statement_annual,
+            'cash_flow_annual': self.process_cash_flow_annual,
+            'balance_sheet_interim': self.process_balance_sheet_interim,
+            'income_statement_interim': self.process_income_statement_interim,
+            'cash_flow_interim': self.process_cash_flow_interim
+        }
     
+
     def process_toplevel_info(self):
         toplevel_mappings = {
             'values': {
@@ -136,15 +151,29 @@ class process_ReportsFinStatements(ib_xml_processor):
         itemlevel_attribs = {
                     'StatementType': 'Type'
         }
-
+        list_fixed_columns_map = {
+            'FiscalPeriodType': 'Type', 
+            'FiscalPeriodEndDate': 'EndDate', 
+            'FiscalPeriodYear': 'FiscalYear'
+        }
+        if periodType == 'Interim':
+            list_fixed_columns_map['FiscalPeriodNumber'] = 'FiscalPeriodNumber'
+        
+        
         # Second, let's get the actual fiscal periods. We need to iterate those, because there are some attributes we want to add to this dataset:
         fiscalperiods = self.tree.findall(f'FinancialStatements/{periodType}Periods/FiscalPeriod[@Type="{periodType}"]')
         for f in fiscalperiods:
-            fixed_columns = {'FiscalPeriodType': f.attrib['Type'], 'FiscalPeriodEndDate': f.attrib['EndDate'], 'FiscalPeriodYear': f.attrib['FiscalYear']}
-            if periodType == 'Interim':
-                fixed_columns['FiscalPeriodNumber'] = f.attrib['FiscalPeriodNumber']
+            fixed_columns = {k: f.attrib[v] for k, v in list_fixed_columns_map.items()}
+            
             dfs += [ self._xml_processor(f, f"Statement[@Type='{statementType}']", itemlevel_mappings, itemlevel_attribs, fixed_columns) ]
         
+        if len(fiscalperiods) == 0:
+            # If there are no fiscal periods, we need to return an empty dataframe with the correct columns.
+
+            # This is kinda ugly: the columns to be returned are calculated on two places.
+            return pd.DataFrame(columns= list(itemlevel_mappings['values'].keys()) + list(itemlevel_mappings['attributes'].keys()) + list(itemlevel_attribs.keys()) + list(list_fixed_columns_map.keys()))
+
+
         # Concatenate all dataframes
         return pd.concat(dfs)
 
@@ -165,10 +194,22 @@ class process_ReportsFinStatements(ib_xml_processor):
 
     def process_cash_flow_interim(self):
         return self._process_financial_statements_helper('Interim', 'CAS')
-class process_RESC(ib_xml_processor):
+class RESC_Processor(ib_xml_processor):
     def __init__(self, xml_file):
         super().__init__(xml_file)
     
+        self.processing_methods = {
+            'security_info': self.process_security_info,
+            'company_profile': self.process_company_profile,
+            'periods_annual': self.process_periods_annual,
+            'periods_interim': self.process_periods_interim,
+            'actuals_annual': self.process_actuals_annual,
+            'actuals_interim': self.process_actuals_interim,
+            'fiscal_year_estimates_annual': self.process_fiscal_year_estimates_annual,
+            'fiscal_year_estimates_interim': self.process_fiscal_year_estimates_interim,
+            'net_profit_estimates': self.process_net_profit_estimates,
+        }
+
     """
     1. Process security info
     """
@@ -330,10 +371,17 @@ class process_RESC(ib_xml_processor):
         return self._xml_processor(self.tree, 'ConsEstimates/NPEstimates/NPEstimate', estimate_mappings, toplevelattributes={'type': 'type', 'unit': 'unit'})
 
 
-class process_ReportSnapshot(ib_xml_processor):
+class ReportSnapshot_Processor(ib_xml_processor):
     def __init__(self, xml_file):
         super().__init__(xml_file)
     
+        self.processing_methods = {
+            'toplevel_info': self.process_toplevel_info, 
+            'issues': self.process_issues, 
+            'ratios': self.process_ratios, 
+            'forecast_data': self.process_forecast_data,
+        }
+
     def process_toplevel_info(self):
         toplevel_mappings = {
             'values': {
@@ -457,32 +505,51 @@ class process_ReportSnapshot(ib_xml_processor):
         return self._xml_processor(self.tree, 'ForecastData', toplevel_mappings, toplevelattributes={'ConsensusType': 'ConsensusType', 'CurFiscalYear': 'CurFiscalYear', 'CurFiscalYearEndMonth': 'CurFiscalYearEndMonth', 'CurInterimEndCalYear': 'CurInterimEndCalYear', 'CurInterimEndMonth': 'CurInterimEndMonth', 'EarningsBasis': 'EarningsBasis'})
 
 functionmapping = {
-    'ReportsFinStatements': process_ReportsFinStatements,
-    'RESC': process_RESC,
-    'ReportSnapshot': process_ReportSnapshot
+    'ReportsFinStatements': ReportsFinStatements_Processor,
+    'RESC': RESC_Processor,
+    'ReportSnapshot': ReportSnapshot_Processor
 }
 
-for comp in companies:
-    for report in os.listdir(f'./fundamentals/{comp}'):
-        if report.endswith('.xml'):
-            # Check if the contents of the file do not start with '[]':
-            with open(f'./fundamentals/{comp}/{report}') as f:
-                contents = f.read()
+if not os.path.exists(f'./export'):
+    os.makedirs(f'./export')
+
+results = {}
+
+for reportType, function in functionmapping.items():
+    for comp in companies:
+        # if file 'ReportsFinStatements.xml' does not exist, skip
+        file_to_process = f'./fundamentals/{comp}/{reportType}.xml'
+        if os.path.exists(file_to_process):
+            # Check first 2 characters of the file to see if it is valid XML and not an empty JSON list
+            with open(file_to_process, 'r') as f:
+                contents = f.read(2)
                 if contents.startswith('[]'):
-                    print(f'File {report} for {comp} is empty. Skipping...')
+                    print(f'File {reportType}.xml for {comp} is empty. Skipping...')
                     continue
             
-            # Process the file
-            process = functionmapping[report.split('.')[0]](f'./fundamentals/{comp}/{report}')
-            
-            # Get all functions from the object 'process' that start with 'process_'
-            functions = [f for f in dir(process) if f.startswith('process_')]
-            for f in functions:
-                print(f'Processing {comp} - {report} - {f}')
-                df = getattr(process, f)()
+            proc_object = function(f'./fundamentals/{comp}/{reportType}.xml')
+            for subreport_type, f in proc_object.processing_methods.items():
+                print(f"Processing {comp} {reportType} {subreport_type}")
+                df = f()
+                df['symbol'] = comp
+                df['reportType'] = reportType
+                if subreport_type not in results:
+                    results[subreport_type] = df
+                else:
+                    results[subreport_type] = pd.concat([results[subreport_type], df])
 
-                if not os.path.exists(f'./export'):
-                    os.makedirs(f'./export')
+    # Write report type to the export directory
+    for subreport_type, df in results.items():
+        # Remove empty columns
+        df = df.dropna(axis=1, how='all')
 
-                df.to_parquet(f'./export/{comp}_{report.split(".")[0]}_{f}.parquet')
-                print(f'Processed {comp} - {report} - {f}')
+        # Detect data types
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                try:
+                    df[col] = pd.to_numeric(df[col])
+                except:
+                    pass
+
+        df.to_parquet(f'./export/{reportType}_{subreport_type}.parquet')
+        print(f'Processed {reportType}_{subreport_type}')

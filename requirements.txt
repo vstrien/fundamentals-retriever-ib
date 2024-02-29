@@ -1,2 +1,4 @@
+pyarrow
+pandas
 ib_insync
 yfinance
