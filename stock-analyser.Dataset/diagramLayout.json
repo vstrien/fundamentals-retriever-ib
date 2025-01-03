@@ -1,0 +1,151 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 728.00431035425447,
+            "y": 133.29226286929247
+          },
+          "nodeIndex": "Annual Balance Sheets",
+          "nodeLineageTag": "dfea7cbe-2678-42ea-9ec1-a85466341ef7",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 10
+        },
+        {
+          "location": {
+            "x": 46.429462459509068,
+            "y": 212.76333534836698
+          },
+          "nodeIndex": "Annual Cash Flow",
+          "nodeLineageTag": "697f90b5-ff1c-4684-8d48-b1aa531866af",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 10,
+            "y": 563.049920120219
+          },
+          "nodeIndex": "Annual Income Statement",
+          "nodeLineageTag": "921f5a84-aa01-48d0-8dcb-d28172ddcf4f",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 1046.3507174660194,
+            "y": 412.23887664253527
+          },
+          "nodeIndex": "Column Names",
+          "nodeLineageTag": "f5a3bce5-c499-4933-819a-7cef3ea987e8",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 772.35071746601943,
+            "y": 483.52568843457561
+          },
+          "nodeIndex": "Interim Balance Sheets",
+          "nodeLineageTag": "8f23e52b-c2bf-4bd9-aeca-edeff4413d8d",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 330.54448748708711,
+            "y": -10
+          },
+          "nodeIndex": "Interim Cash Flow",
+          "nodeLineageTag": "b450ea30-2467-48df-9d7e-94b0f88de3ac",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 468.73511583166959,
+            "y": 690.47775328507055
+          },
+          "nodeIndex": "Interim Income Statement",
+          "nodeLineageTag": "b7999f6d-cbf2-4c26-b95c-5fd3e6353fe4",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 9
+        },
+        {
+          "location": {
+            "x": 1320.3507174660194,
+            "y": 400.23887664253527
+          },
+          "nodeIndex": "MeasureTable",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 1618.3507174660194,
+            "y": 0
+          },
+          "nodeIndex": "AnnualPeriod",
+          "nodeLineageTag": "f2781140-70af-4b02-b22d-0d82ef18bbe7",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 418.35071746601943,
+            "y": 346.23887664253527
+          },
+          "nodeIndex": "Company General Info",
+          "nodeLineageTag": "839225d5-6bd8-43af-933f-6f81ea009f07",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 1
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

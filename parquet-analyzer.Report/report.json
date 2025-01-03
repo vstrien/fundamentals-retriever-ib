@@ -1,0 +1,120 @@
+{
+  "config": "{\"version\":\"5.51\",\"themeCollection\":{\"baseTheme\":{\"name\":\"CY24SU02\",\"version\":\"5.51\",\"type\":2}},\"activeSectionIndex\":2,\"defaultDrillFilterOtherVisuals\":true,\"linguisticSchemaSyncVersion\":2,\"settings\":{\"useNewFilterPaneExperience\":true,\"allowChangeFilterTypes\":true,\"useStylableVisualContainerHeader\":true,\"queryLimitOption\":6,\"useEnhancedTooltips\":true,\"exportDataMode\":1,\"useDefaultAggregateDisplayName\":true},\"objects\":{\"section\":[{\"properties\":{\"verticalAlignment\":{\"expr\":{\"Literal\":{\"Value\":\"'Top'\"}}}}}]}}",
+  "layoutOptimization": 0,
+  "resourcePackages": [
+    {
+      "resourcePackage": {
+        "disabled": false,
+        "items": [
+          {
+            "name": "CY24SU02",
+            "path": "BaseThemes/CY24SU02.json",
+            "type": 202
+          }
+        ],
+        "name": "SharedResources",
+        "type": 2
+      }
+    }
+  ],
+  "sections": [
+    {
+      "config": "{}",
+      "displayName": "Column descriptions",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.00,
+      "name": "ReportSection",
+      "visualContainers": [
+        {
+          "config": "{\"name\":\"3bfad9f05abe65d440be\",\"layouts\":[{\"id\":0,\"position\":{\"x\":454.77555623021203,\"y\":0,\"z\":1000,\"width\":370.68945078139683,\"height\":720.0612973645025}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"Column Mapping.ColumnCode\"},{\"queryRef\":\"Column Mapping.ColumnDesc\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Column Mapping\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnCode\"},\"Name\":\"Column Mapping.ColumnCode\",\"NativeReferenceName\":\"ColumnCode\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnDesc\"},\"Name\":\"Column Mapping.ColumnDesc\",\"NativeReferenceName\":\"ColumnDesc\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnCode\"}}}]},\"drillFilterOtherVisuals\":true,\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Cashflow columns'\"}}}}}]}}}",
+          "filters": "[{\"name\":\"Filter01aa4a62b36b9c37bbd4\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Column Mapping\"}},\"Property\":\"StatementType\"}},\"filter\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Column Mapping\",\"Type\":0}],\"Where\":[{\"Condition\":{\"In\":{\"Expressions\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"StatementType\"}}],\"Values\":[[{\"Literal\":{\"Value\":\"'CAS'\"}}]]}}}]},\"type\":\"Categorical\",\"howCreated\":1,\"objects\":{},\"isHiddenInViewMode\":false}]",
+          "height": 720.06,
+          "width": 370.69,
+          "x": 454.78,
+          "y": 0.00,
+          "z": 1000.00
+        },
+        {
+          "config": "{\"name\":\"760288f220c662597c31\",\"layouts\":[{\"id\":0,\"position\":{\"x\":909.5511124604241,\"y\":0,\"z\":2000,\"width\":370.68945078139683,\"height\":720.0612973645025}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"Column Mapping.ColumnCode\"},{\"queryRef\":\"Column Mapping.ColumnDesc\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Column Mapping\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnCode\"},\"Name\":\"Column Mapping.ColumnCode\",\"NativeReferenceName\":\"ColumnCode\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnDesc\"},\"Name\":\"Column Mapping.ColumnDesc\",\"NativeReferenceName\":\"ColumnDesc\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnCode\"}}}]},\"drillFilterOtherVisuals\":true,\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Income Statement columns'\"}}}}}]}}}",
+          "filters": "[{\"name\":\"Filter01aa4a62b36b9c37bbd4\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Column Mapping\"}},\"Property\":\"StatementType\"}},\"filter\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Column Mapping\",\"Type\":0}],\"Where\":[{\"Condition\":{\"In\":{\"Expressions\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"StatementType\"}}],\"Values\":[[{\"Literal\":{\"Value\":\"'INC'\"}}]]}}}]},\"type\":\"Categorical\",\"howCreated\":1,\"objects\":{},\"isHiddenInViewMode\":false}]",
+          "height": 720.06,
+          "width": 370.69,
+          "x": 909.55,
+          "y": 0.00,
+          "z": 2000.00
+        },
+        {
+          "config": "{\"name\":\"781a223c07546e05d076\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0,\"width\":370.68945078139683,\"height\":720.0612973645025}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"Column Mapping.ColumnCode\"},{\"queryRef\":\"Column Mapping.ColumnDesc\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Column Mapping\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnCode\"},\"Name\":\"Column Mapping.ColumnCode\",\"NativeReferenceName\":\"ColumnCode\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnDesc\"},\"Name\":\"Column Mapping.ColumnDesc\",\"NativeReferenceName\":\"ColumnDesc\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"ColumnCode\"}}}]},\"drillFilterOtherVisuals\":true,\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"text\":{\"expr\":{\"Literal\":{\"Value\":\"'Balance sheet columns'\"}}}}}]}}}",
+          "filters": "[{\"name\":\"Filter01aa4a62b36b9c37bbd4\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Column Mapping\"}},\"Property\":\"StatementType\"}},\"filter\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Column Mapping\",\"Type\":0}],\"Where\":[{\"Condition\":{\"In\":{\"Expressions\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"StatementType\"}}],\"Values\":[[{\"Literal\":{\"Value\":\"'BAL'\"}}]]}}}]},\"type\":\"Categorical\",\"howCreated\":1,\"objects\":{},\"isHiddenInViewMode\":false}]",
+          "height": 720.06,
+          "width": 370.69,
+          "x": 0.00,
+          "y": 0.00,
+          "z": 0.00
+        }
+      ],
+      "width": 1280.00
+    },
+    {
+      "config": "{}",
+      "displayName": "Banks",
+      "displayOption": 1,
+      "filters": "[{\"name\":\"Filterfe133a1ac2a44183d08e\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Company Profile\"}},\"Property\":\"sectorName\"}},\"filter\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Company Profile\",\"Type\":0}],\"Where\":[{\"Condition\":{\"In\":{\"Expressions\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"sectorName\"}}],\"Values\":[[{\"Literal\":{\"Value\":\"'Banks (NEC)'\"}}]]}}}]},\"type\":\"Categorical\",\"howCreated\":1,\"objects\":{}}]",
+      "height": 720.00,
+      "name": "ReportSectiona40043e6cdb408925aa0",
+      "ordinal": 1,
+      "visualContainers": [
+        {
+          "config": "{\"name\":\"e519c9d8c90e9c078c4e\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0,\"width\":81.71748276011623,\"height\":720.0612973645025,\"tabOrder\":1000}}],\"singleVisual\":{\"visualType\":\"advancedSlicerVisual\",\"projections\":{\"Values\":[{\"queryRef\":\"Company Profile.symbol\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Company Profile\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"symbol\"},\"Name\":\"Company Profile.symbol\",\"NativeReferenceName\":\"symbol\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"symbol\"}}}]},\"drillFilterOtherVisuals\":true,\"objects\":{\"data\":[{\"properties\":{}}],\"general\":[{\"properties\":{\"filter\":{\"filter\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Company Profile\",\"Type\":0}],\"Where\":[{\"Condition\":{\"In\":{\"Expressions\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"symbol\"}}],\"Values\":[[{\"Literal\":{\"Value\":\"'BAC'\"}}]]}}}]}}}}],\"layout\":[{\"properties\":{\"orientation\":{\"expr\":{\"Literal\":{\"Value\":\"1D\"}}},\"maxTiles\":{\"expr\":{\"Literal\":{\"Value\":\"10L\"}}}}}],\"selection\":[{\"properties\":{\"strictSingleSelect\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}]}}}",
+          "filters": "[]",
+          "height": 720.06,
+          "width": 81.72,
+          "x": 0.00,
+          "y": 0.00,
+          "z": 0.00
+        },
+        {
+          "config": "{\"name\":\"eea8bfeb55064cdd50b4\",\"layouts\":[{\"id\":0,\"position\":{\"x\":84.08610544881525,\"y\":0,\"z\":1000,\"width\":657.2927961139784,\"height\":63.95281259487357,\"tabOrder\":0}}],\"singleVisual\":{\"visualType\":\"textbox\",\"drillFilterOtherVisuals\":true,\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":{\"propertyIdentifier\":{\"objectName\":\"values\",\"propertyName\":\"expr\"},\"selector\":{\"id\":\"Company name\"}},\"textStyle\":{\"fontSize\":\"24pt\"}}]}]}}],\"values\":[{\"properties\":{\"expr\":{\"expr\":{\"Min\":{\"Expression\":{\"Column\":{\"Expression\":{\"Subquery\":{\"Query\":{\"Version\":2,\"From\":[{\"Name\":\"t\",\"Entity\":\"Toplevel Information\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"t\"}},\"Property\":\"CompanyName\"},\"Name\":\"Toplevel Information.CompanyName\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"t\"}},\"Property\":\"CompanyName\"}}}]}}},\"Property\":\"Toplevel Information.CompanyName\"}},\"IncludeAllTypes\":1},\"Annotations\":{\"NaturalLanguage\":{\"version\":1,\"kind\":\"NaturalLanguage\",\"annotation\":{\"name\":\"Company name\",\"utterance\":\"company name\"}}}}}},\"selector\":{\"id\":\"Company name\"}}]}}}",
+          "filters": "[]",
+          "height": 63.95,
+          "width": 657.29,
+          "x": 84.09,
+          "y": 0.00,
+          "z": 1000.00
+        }
+      ],
+      "width": 1280.00
+    },
+    {
+      "config": "{}",
+      "displayName": "Banks analysis",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.00,
+      "name": "ReportSectionf15999de7388816a1297",
+      "ordinal": 2,
+      "visualContainers": [
+        {
+          "config": "{\"name\":\"6ac1c70ef90fed757638\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0,\"width\":451.77682403433477,\"height\":483.91416309012874}}],\"singleVisual\":{\"visualType\":\"clusteredBarChart\",\"projections\":{\"Category\":[{\"queryRef\":\"Company Profile.symbol\"}],\"Y\":[{\"queryRef\":\"Bank measures.Total Operating Income (Annual)\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Company Profile\",\"Type\":0},{\"Name\":\"b\",\"Entity\":\"Bank measures\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"symbol\"},\"Name\":\"Company Profile.symbol\",\"NativeReferenceName\":\"symbol1\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"b\"}},\"Property\":\"Total Operating Income (Annual)\"},\"Name\":\"Bank measures.Total Operating Income (Annual)\",\"NativeReferenceName\":\"Total Operating Income (Annual)\"}],\"OrderBy\":[{\"Direction\":2,\"Expression\":{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"b\"}},\"Property\":\"Total Operating Income (Annual)\"}}}]},\"autoSelectVisualType\":true,\"drillFilterOtherVisuals\":true}}",
+          "filters": "[{\"name\":\"Filter7b650e110a0783a31315\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Company Profile\"}},\"Property\":\"sectorName\"}},\"filter\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Company Profile\",\"Type\":0}],\"Where\":[{\"Condition\":{\"In\":{\"Expressions\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"sectorName\"}}],\"Values\":[[{\"Literal\":{\"Value\":\"'Banks (NEC)'\"}}]]}}}]},\"type\":\"Categorical\",\"howCreated\":1,\"objects\":{}}]",
+          "height": 483.91,
+          "width": 451.78,
+          "x": 0.00,
+          "y": 0.00,
+          "z": 0.00
+        },
+        {
+          "config": "{\"name\":\"f5de66b30b689fe5aedf\",\"layouts\":[{\"id\":0,\"position\":{\"x\":753.37339055794,\"y\":0,\"z\":1,\"width\":451.77682403433477,\"height\":412.84120171673817}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"Periods (Annual).periodKey\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"p\",\"Entity\":\"Periods (Annual)\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"p\"}},\"Property\":\"periodKey\"},\"Name\":\"Periods (Annual).periodKey\",\"NativeReferenceName\":\"periodKey\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"p\"}},\"Property\":\"periodKey\"}}}]},\"autoSelectVisualType\":true,\"drillFilterOtherVisuals\":true}}",
+          "filters": "[]",
+          "height": 412.84,
+          "width": 451.78,
+          "x": 753.37,
+          "y": 0.00,
+          "z": 1.00
+        }
+      ],
+      "width": 1280.00
+    }
+  ]
+}

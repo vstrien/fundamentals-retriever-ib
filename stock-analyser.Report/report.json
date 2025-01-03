@@ -1,0 +1,63 @@
+{
+  "config": "{\"version\":\"5.51\",\"themeCollection\":{\"baseTheme\":{\"name\":\"CY24SU02\",\"version\":\"5.51\",\"type\":2}},\"activeSectionIndex\":1,\"defaultDrillFilterOtherVisuals\":true,\"linguisticSchemaSyncVersion\":2,\"settings\":{\"useNewFilterPaneExperience\":true,\"allowChangeFilterTypes\":true,\"useStylableVisualContainerHeader\":true,\"queryLimitOption\":6,\"useEnhancedTooltips\":true,\"exportDataMode\":1,\"useDefaultAggregateDisplayName\":true},\"objects\":{\"section\":[{\"properties\":{\"verticalAlignment\":{\"expr\":{\"Literal\":{\"Value\":\"'Top'\"}}}}}]}}",
+  "layoutOptimization": 0,
+  "resourcePackages": [
+    {
+      "resourcePackage": {
+        "disabled": false,
+        "items": [
+          {
+            "name": "CY24SU02",
+            "path": "BaseThemes/CY24SU02.json",
+            "type": 202
+          }
+        ],
+        "name": "SharedResources",
+        "type": 2
+      }
+    }
+  ],
+  "sections": [
+    {
+      "config": "{}",
+      "displayName": "Banks",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.00,
+      "name": "ReportSection",
+      "ordinal": 1,
+      "visualContainers": [
+        {
+          "config": "{\"name\":\"713194d8484b7c496430\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":307.77682403433477,\"z\":0,\"width\":584.0343347639484,\"height\":412.22317596566523}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"Company General Info.Symbol\"},{\"queryRef\":\"MeasureTable.Annual NIM\"},{\"queryRef\":\"MeasureTable.Annual LLP to NNI\"},{\"queryRef\":\"MeasureTable.Efficiency Ratio\"},{\"queryRef\":\"MeasureTable.Annual ROA\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"m\",\"Entity\":\"MeasureTable\",\"Type\":0},{\"Name\":\"c\",\"Entity\":\"Company General Info\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Annual NIM\"},\"Name\":\"MeasureTable.Annual NIM\",\"NativeReferenceName\":\"Annual NIM\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"Symbol\"},\"Name\":\"Company General Info.Symbol\",\"NativeReferenceName\":\"Symbol\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Annual LLP to NNI\"},\"Name\":\"MeasureTable.Annual LLP to NNI\",\"NativeReferenceName\":\"Annual LLP to NNI\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Efficiency Ratio\"},\"Name\":\"MeasureTable.Efficiency Ratio\",\"NativeReferenceName\":\"Efficiency Ratio\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"m\"}},\"Property\":\"Annual ROA\"},\"Name\":\"MeasureTable.Annual ROA\",\"NativeReferenceName\":\"Annual ROA\"}]},\"drillFilterOtherVisuals\":true}}",
+          "filters": "[]",
+          "height": 412.22,
+          "width": 584.03,
+          "x": 0.00,
+          "y": 307.78,
+          "z": 0.00
+        }
+      ],
+      "width": 1280.00
+    },
+    {
+      "config": "{}",
+      "displayName": "Description",
+      "displayOption": 1,
+      "filters": "[]",
+      "height": 720.00,
+      "name": "ReportSection91d96d8baaa6aaa8de06",
+      "visualContainers": [
+        {
+          "config": "{\"name\":\"dd2391fd302422717784\",\"layouts\":[{\"id\":0,\"position\":{\"x\":9.888412017167381,\"y\":0,\"z\":0,\"width\":796.0171673819742,\"height\":279.9656652360515,\"tabOrder\":0}}],\"singleVisual\":{\"visualType\":\"textbox\",\"drillFilterOtherVisuals\":true,\"objects\":{\"general\":[{\"properties\":{\"paragraphs\":[{\"textRuns\":[{\"value\":\"In this workbook you'll find all kinds of metrics for fundamental analysis & comparison of stocks.\"}]},{\"textRuns\":[{\"value\":\"\"}]},{\"textRuns\":[{\"value\":\"To add:\"}]},{\"textRuns\":[{\"value\":\"* Indicators which industry a stock belongs to (banks, SaaS companies, etc.)\"}]},{\"textRuns\":[{\"value\":\"* More calculated important indicators \"},{\"value\":\"per\",\"textStyle\":{\"fontStyle\":\"italic\"}},{\"value\":\" industry (for banking: CIR, CAR, LDR, Asset Quality Indicators, Liquidity Ratios)\"}]},{\"textRuns\":[{\"value\":\"* A good report / dashboard to analyze a single stock given a specific industry, showing immediately:\"}]},{\"textRuns\":[{\"value\":\"  * its competitors (comparison)\"}]},{\"textRuns\":[{\"value\":\"  * important key financial indicators\"}]},{\"textRuns\":[{\"value\":\"  * a rationale why these were chosen\"}]},{\"textRuns\":[{\"value\":\"  * links to Yahoo Finance, Google Finance, MSN Money, YCombinator, Zacks, and other important sources\"}]},{\"textRuns\":[{\"value\":\"* history of indicators\"}]},{\"textRuns\":[{\"value\":\"* a switch between quarterly and annual reporting\"}]},{\"textRuns\":[{\"value\":\"\"}]},{\"textRuns\":[{\"value\":\"To consider:\"}]},{\"textRuns\":[{\"value\":\"* A top 10 of important indicators per industry, dynamically shown\"}]}]}}]}}}",
+          "filters": "[]",
+          "height": 279.97,
+          "width": 796.02,
+          "x": 9.89,
+          "y": 0.00,
+          "z": 0.00
+        }
+      ],
+      "width": 1280.00
+    }
+  ]
+}
